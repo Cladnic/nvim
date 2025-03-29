@@ -891,7 +891,7 @@ require('lazy').setup({
             'clangd',
             '--compile-commands-dir=build',
             '--background-index',
-            '--query-driver=/proj/epg-tools/compilers/ericsson-clang18.0.1-612a2c1f8b-rhel7.9-binutils2.38-stdlibgcc14.2.0_4/bin/clang',
+            '--query-driver=clangd,gcc',
           },
         },
         -- gopls = {},
@@ -1256,6 +1256,10 @@ require('lazy').setup({
 -- My own config
 vim.opt.swapfile = false
 vim.opt.scrolloff = 5
+vim.opt.expandtab = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.softtabstop = 4
 
 -- Create an autocommand group to manage related autocommands
 vim.api.nvim_create_augroup('NoColorFileType', { clear = true })
