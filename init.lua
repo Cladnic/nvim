@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -236,10 +236,47 @@ vim.opt.rtp:prepend(lazypath)
 --  To update plugins you can run
 --    :Lazy update
 --
+
+local function setupCustomHighlightGroup()
+  vim.api.nvim_command 'hi clear FlashMatch'
+  vim.api.nvim_command 'hi clear FlashCurrent'
+  vim.api.nvim_command 'hi clear FlashLabel'
+
+  vim.api.nvim_command 'hi FlashMatch guibg=#4A47A3 guifg=#B8B5FF'
+  vim.api.nvim_command 'hi FlashCurrent guibg=#456268 guifg=#D0E8F2'
+  vim.api.nvim_command 'hi FlashLabel guibg=#A25772 guifg=#EEF5FF'
+end
+
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    opts = {
+      highlight = {
+        backdrop = true,
+        groups = {
+          match = 'FlashMatch',
+          current = 'FlashCurrent',
+          backdrop = 'FlashBackdrop',
+          label = 'FlashLabel',
+        },
+      },
+    },
+    config = function()
+      setupCustomHighlightGroup()
+    end,
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
+  },
   {
     'pteroctopus/faster.nvim',
     opts = {
@@ -794,6 +831,8 @@ require('lazy').setup({
       --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      capabilities.textDocument.formatting = false
+      capabilities.textDocument.rangeFormatting = false
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -805,7 +844,15 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          capabilities = capabilities,
+          cmd = {
+            'clangd',
+            '--compile-commands-dir=build',
+            '--background-index',
+            '--query-driver=/proj/epg-tools/compilers/ericsson-clang18.0.1-612a2c1f8b-rhel7.9-binutils2.38-stdlibgcc14.2.0_4/bin/clang',
+          },
+        },
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -1167,6 +1214,19 @@ require('lazy').setup({
 
 -- My own config
 vim.opt.swapfile = false
+vim.opt.scrolloff = 5
+
+-- Create an autocommand group to manage related autocommands
+vim.api.nvim_create_augroup('NoColorFileType', { clear = true })
+
+-- Set the filetype for non-colored files to groovy
+vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
+  group = 'NoColorFileType',
+  pattern = { '*.ttcn', 'Jenkins*' },
+  callback = function()
+    vim.bo.filetype = 'groovy'
+  end,
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
