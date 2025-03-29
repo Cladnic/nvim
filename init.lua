@@ -624,6 +624,11 @@ require('lazy').setup({
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
+      vim.keymap.set('n', '<leader>l', function()
+        builtin.lsp_document_symbols {
+          symbols = { 'function', 'method' }, -- This filters to show only functions
+        }
+      end, { noremap = true, silent = true })
       vim.keymap.set('n', '<leader>so', builtin.git_files, { desc = '[S]earch [O]nly Git files' })
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
