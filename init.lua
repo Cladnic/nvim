@@ -888,7 +888,7 @@ require('lazy').setup({
         clangd = {
           capabilities = capabilities,
           cmd = {
-            'clang',
+            'clangd',
             '--compile-commands-dir=build',
             '--background-index',
             '--query-driver=/proj/epg-tools/compilers/ericsson-clang18.0.1-612a2c1f8b-rhel7.9-binutils2.38-stdlibgcc14.2.0_4/bin/clang',
