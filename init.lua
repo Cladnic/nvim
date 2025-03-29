@@ -170,6 +170,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<leader>r', vim.diagnostic.open_float, { desc = '[R]ead diagnostic message' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -571,15 +572,43 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
         defaults = {
+          vimgrep_arguments = {
+            'rg',
+            '--color=never',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--smart-case',
+          },
           path_display = {
             'truncate',
+          },
+          debounce = 50,
+          results_limit = 500,
+        },
+        pickers = {
+          find_files = {
+            find_command = {
+              'fd',
+              '--type',
+              'f',
+              '--hidden',
+              '--follow',
+              '--exclude',
+              '.git',
+              '--exclude',
+              'node_modules',
+              '--exclude',
+              '*.o',
+              '--exclude',
+              'build',
+              '--exclude',
+              '3pp',
+              '--exclude',
+              'docs',
+            },
           },
         },
         extensions = {
@@ -657,7 +686,19 @@ require('lazy').setup({
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
+      {
+        'j-hui/fidget.nvim',
+        text = {
+          spinner = 'dots', -- Choose a lighter spinner
+        },
+        timer = {
+          spinner_rate = 125, -- Adjust update rate
+          fidget_decay = 2000, -- Lifetime of fidget indicators
+        },
+        window = {
+          blend = 0, -- Transparency of window
+        },
+      },
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
@@ -847,7 +888,7 @@ require('lazy').setup({
         clangd = {
           capabilities = capabilities,
           cmd = {
-            'clangd',
+            'clang',
             '--compile-commands-dir=build',
             '--background-index',
             '--query-driver=/proj/epg-tools/compilers/ericsson-clang18.0.1-612a2c1f8b-rhel7.9-binutils2.38-stdlibgcc14.2.0_4/bin/clang',
